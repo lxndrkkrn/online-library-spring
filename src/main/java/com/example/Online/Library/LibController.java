@@ -48,7 +48,7 @@ public class LibController {
 
     }
 
-    @GetMapping("/authors/{id}/books")
+    @GetMapping("/authors/{id}/books") // show all books by authorID
     public List<Book> showAllBooksByAuthor(@PathVariable Integer id) {
 
         return repositoryBooks.showAllBooksByAuthorList(id);
