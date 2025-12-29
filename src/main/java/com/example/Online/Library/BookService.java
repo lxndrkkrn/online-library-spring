@@ -1,40 +1,42 @@
 package com.example.Online.Library;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Repository
+@Service
 public class BookService {
 
-    private final Map<Integer, Book> bookStorage = new ConcurrentHashMap<>();
+    private final AuthorRepository repositoryAuthor;
+    private final BookRepository repositoryBooks;
 
-    public void addBook(Book book) {
+    public BookService(AuthorRepository repositoryAuthor, BookRepository repositoryBook) {
+        this.repositoryAuthor = repositoryAuthor;
+        this.repositoryBooks = repositoryBook;
+    }
 
-        if (book.id() < 0) return;
+    public void saveBook(Book book) {
 
-        bookStorage.put(book.id(), book);
+        if (!repositoryAuthor.existsById(book.getAuthorId())) {
+            throw new RuntimeException("Author not found");
+        }
+        if (book.getReleaseYear() < 0) {
+            throw new RuntimeException("Invalid year");
+        }
+
+        repositoryBooks.save(book);
 
     }
 
-    public void removeAllBooks(Integer authorId) {
+    public List<Book> findAllBooks() {
 
-        bookStorage.values().removeIf(book -> book.authorId().equals(authorId));
-
-    }
-
-    public List<Book> showAllBooks() {
-
-        return new ArrayList<>(bookStorage.values());
+        return repositoryBooks.findAll();
 
     }
 
-    public List<Book> showAllBooksByAuthorList(Integer authorId) {
+    public List<Book> showAllBooksByAuthor(Integer id) {
 
-        return bookStorage.values().stream().filter(book -> book.authorId().equals(authorId)).toList();
+        return repositoryBooks.findByAuthorId(id);
 
     }
 

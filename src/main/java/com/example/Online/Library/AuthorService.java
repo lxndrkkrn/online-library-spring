@@ -1,33 +1,39 @@
 package com.example.Online.Library;
 
-import org.springframework.stereotype.Repository;
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Repository
+@Service
 public class AuthorService {
 
-    private final Map<Integer, Author> authorStorage = new ConcurrentHashMap<>();
+    private final AuthorRepository repositoryAuthor;
+    private final BookRepository repositoryBooks;
 
-    public void addAuthor(Author author) {
-
-        if (author.id() < 0) return;
-
-        authorStorage.put(author.id(), author);
-
+    public AuthorService(AuthorRepository repositoryAuthor, BookRepository repositoryBooks) {
+        this.repositoryAuthor = repositoryAuthor;
+        this.repositoryBooks = repositoryBooks;
     }
 
-    public void removeAuthor(Integer id) {
-
-        authorStorage.remove(id);
-
+    public void saveAuthor(Author author) {
+        repositoryAuthor.save(author);
     }
 
-    public boolean isAuthorExist(Integer id) {
+    public boolean deleteAuthor(Integer id) {
 
-        return authorStorage.containsKey(id);
+        if (!repositoryAuthor.existsById(id)) {
+            return false;
+        }
 
+        deleteAuthorNotLogic(id);
+        return true;
+    }
+
+    @Transactional
+    public void deleteAuthorNotLogic(Integer id) {
+        repositoryBooks.deleteByAuthorId(id);
+        repositoryAuthor.deleteById(id);
     }
 
 }
